@@ -1,13 +1,13 @@
 package org.commonmark.renderer.text;
 
 import java.util.Set;
+import org.commonmark.internal.renderer.AbstractVisitorNodeRenderer;
 import org.commonmark.node.*;
-import org.commonmark.renderer.NodeRenderer;
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
  */
-public class CoreTextContentNodeRenderer extends AbstractVisitor implements NodeRenderer {
+public class CoreTextContentNodeRenderer extends AbstractVisitorNodeRenderer {
 
     protected final TextContentNodeRendererContext context;
     private final TextContentWriter textContent;
@@ -42,11 +42,6 @@ public class CoreTextContentNodeRenderer extends AbstractVisitor implements Node
                 HtmlInline.class,
                 SoftLineBreak.class,
                 HardLineBreak.class);
-    }
-
-    @Override
-    public void render(Node node) {
-        node.accept(this);
     }
 
     @Override
@@ -214,13 +209,8 @@ public class CoreTextContentNodeRenderer extends AbstractVisitor implements Node
     }
 
     @Override
-    protected void visitChildren(Node parent) {
-        Node node = parent.getFirstChild();
-        while (node != null) {
-            Node next = node.getNext();
-            context.render(node);
-            node = next;
-        }
+    protected void renderChild(Node node) {
+        context.render(node);
     }
 
     private void writeText(String text) {

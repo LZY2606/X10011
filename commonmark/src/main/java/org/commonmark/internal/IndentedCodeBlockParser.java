@@ -22,7 +22,7 @@ public class IndentedCodeBlockParser extends AbstractBlockParser {
 
     @Override
     public BlockContinue tryContinue(ParserState state) {
-        if (state.getIndent() >= Parsing.CODE_BLOCK_INDENT) {
+        if (Parsing.isCodeBlockIndent(state.getIndent())) {
             return BlockContinue.atColumn(state.getColumn() + Parsing.CODE_BLOCK_INDENT);
         } else if (state.isBlank()) {
             return BlockContinue.atIndex(state.getNextNonSpaceIndex());
@@ -61,7 +61,7 @@ public class IndentedCodeBlockParser extends AbstractBlockParser {
         @Override
         public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
             // An indented code block cannot interrupt a paragraph.
-            if (state.getIndent() >= Parsing.CODE_BLOCK_INDENT
+            if (Parsing.isCodeBlockIndent(state.getIndent())
                     && !state.isBlank()
                     && !(state.getActiveBlockParser().getBlock() instanceof Paragraph)) {
                 return BlockStart.of(new IndentedCodeBlockParser())

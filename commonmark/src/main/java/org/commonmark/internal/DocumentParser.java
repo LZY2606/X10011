@@ -256,7 +256,7 @@ public class DocumentParser implements ParserState {
 
             // this is a little performance optimization:
             if (isBlank()
-                    || (indent < Parsing.CODE_BLOCK_INDENT
+                    || (!Parsing.isCodeBlockIndent(indent)
                             && Characters.isLetter(this.line.getContent(), nextNonSpace))) {
                 setNewIndex(nextNonSpace);
                 break;

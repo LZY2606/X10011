@@ -1,20 +1,19 @@
 package org.commonmark.renderer.html;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import org.commonmark.internal.util.Escaping;
+import org.commonmark.internal.util.LastCharAppendable;
 
 public class HtmlWriter {
 
     private static final Map<String, String> NO_ATTRIBUTES = Map.of();
 
-    private final Appendable buffer;
-    private char lastChar = 0;
+    private final LastCharAppendable buffer;
 
     public HtmlWriter(Appendable out) {
         Objects.requireNonNull(out, "out must not be null");
-        this.buffer = out;
+        this.buffer = new LastCharAppendable(out);
     }
 
     public void raw(String s) {
@@ -55,20 +54,12 @@ public class HtmlWriter {
     }
 
     public void line() {
-        if (lastChar != 0 && lastChar != '\n') {
+        if (buffer.getLastChar() != 0 && buffer.getLastChar() != '\n') {
             append("\n");
         }
     }
 
     protected void append(String s) {
-        try {
-            buffer.append(s);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        int length = s.length();
-        if (length != 0) {
-            lastChar = s.charAt(length - 1);
-        }
+        buffer.append(s);
     }
 }

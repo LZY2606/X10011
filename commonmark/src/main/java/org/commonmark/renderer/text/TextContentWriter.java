@@ -1,36 +1,35 @@
 package org.commonmark.renderer.text;
 
-import java.io.IOException;
 import java.util.LinkedList;
+import org.commonmark.internal.util.LastCharAppendable;
 
 public class TextContentWriter {
 
-    private final Appendable buffer;
+    private final LastCharAppendable buffer;
     private final LineBreakRendering lineBreakRendering;
 
     private final LinkedList<String> prefixes = new LinkedList<>();
     private final LinkedList<Boolean> tight = new LinkedList<>();
 
     private String blockSeparator = null;
-    private char lastChar;
 
     public TextContentWriter(Appendable out) {
         this(out, LineBreakRendering.COMPACT);
     }
 
     public TextContentWriter(Appendable out, LineBreakRendering lineBreakRendering) {
-        this.buffer = out;
+        this.buffer = new LastCharAppendable(out);
         this.lineBreakRendering = lineBreakRendering;
     }
 
     public void whitespace() {
-        if (lastChar != 0 && lastChar != ' ') {
+        if (buffer.getLastChar() != 0 && buffer.getLastChar() != ' ') {
             write(' ');
         }
     }
 
     public void colon() {
-        if (lastChar != 0 && lastChar != ':') {
+        if (buffer.getLastChar() != 0 && buffer.getLastChar() != ':') {
             write(':');
         }
     }
@@ -139,25 +138,10 @@ public class TextContentWriter {
     }
 
     private void append(String s) {
-        try {
-            buffer.append(s);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        int length = s.length();
-        if (length != 0) {
-            lastChar = s.charAt(length - 1);
-        }
+        buffer.append(s);
     }
 
     private void append(char c) {
-        try {
-            buffer.append(c);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        lastChar = c;
+        buffer.append(c);
     }
 }

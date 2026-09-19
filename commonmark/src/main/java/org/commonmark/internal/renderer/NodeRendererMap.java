@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import org.commonmark.node.Node;
 import org.commonmark.renderer.NodeRenderer;
 
@@ -22,6 +23,23 @@ public class NodeRendererMap {
             // The first node renderer for a node type "wins".
             renderers.putIfAbsent(nodeType, nodeRenderer);
         }
+    }
+
+    /**
+     * Create a map with a node renderer for each of the supplied factories, in order.
+     *
+     * @param nodeRendererFactories the factories to create node renderers with
+     * @param createRenderer creates the node renderer for a factory
+     * @return the map of node renderers
+     * @param <F> the factory type
+     */
+    public static <F> NodeRendererMap create(
+            Iterable<F> nodeRendererFactories, Function<F, NodeRenderer> createRenderer) {
+        NodeRendererMap nodeRendererMap = new NodeRendererMap();
+        for (F factory : nodeRendererFactories) {
+            nodeRendererMap.add(createRenderer.apply(factory));
+        }
+        return nodeRendererMap;
     }
 
     public void render(Node node) {

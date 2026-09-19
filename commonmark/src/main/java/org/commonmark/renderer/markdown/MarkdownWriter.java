@@ -1,17 +1,16 @@
 package org.commonmark.renderer.markdown;
 
-import java.io.IOException;
 import java.util.LinkedList;
+import org.commonmark.internal.util.LastCharAppendable;
 import org.commonmark.text.CharMatcher;
 
 /** Writer for Markdown (CommonMark) text. */
 public class MarkdownWriter {
 
-    private final Appendable buffer;
+    private final LastCharAppendable buffer;
     private final String lineSeparator;
 
     private int blockSeparator = 0;
-    private char lastChar;
     private boolean atLineStart = true;
 
     // Stacks of settings that affect various rendering behaviors. The common pattern here is that
@@ -26,7 +25,7 @@ public class MarkdownWriter {
     }
 
     public MarkdownWriter(Appendable out, String lineSeparator) {
-        this.buffer = out;
+        this.buffer = new LastCharAppendable(out);
         this.lineSeparator = lineSeparator;
     }
 
@@ -55,7 +54,7 @@ public class MarkdownWriter {
         flushBlockSeparator();
         write(s, escape);
 
-        lastChar = s.charAt(s.length() - 1);
+        buffer.setLastChar(s.charAt(s.length() - 1));
         atLineStart = false;
     }
 
@@ -141,7 +140,7 @@ public class MarkdownWriter {
      * @return the last character that was written
      */
     public char getLastChar() {
-        return lastChar;
+        return buffer.getLastChar();
     }
 
     /**
@@ -153,45 +152,29 @@ public class MarkdownWriter {
     }
 
     private void write(String s, CharMatcher escape) {
-        try {
-            if (rawEscapes.isEmpty() && escape == null) {
-                // Normal fast path
-                buffer.append(s);
-            } else {
-                for (int i = 0; i < s.length(); i++) {
-                    append(s.charAt(i), escape);
-                }
+        if (rawEscapes.isEmpty() && escape == null) {
+            // Normal fast path
+            buffer.append(s);
+        } else {
+            for (int i = 0; i < s.length(); i++) {
+                append(s.charAt(i), escape);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        int length = s.length();
-        if (length != 0) {
-            lastChar = s.charAt(length - 1);
+            int length = s.length();
+            if (length != 0) {
+                buffer.setLastChar(s.charAt(length - 1));
+            }
         }
         atLineStart = false;
     }
 
     private void write(String s) {
-        try {
-            buffer.append(s);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        lastChar = s.charAt(s.length() - 1);
+        buffer.append(s);
         atLineStart = false;
     }
 
     private void write(char c) {
-        try {
-            append(c, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        lastChar = c;
+        append(c, null);
+        buffer.setLastChar(c);
         atLineStart = false;
     }
 
@@ -219,7 +202,7 @@ public class MarkdownWriter {
         }
     }
 
-    private void append(char c, CharMatcher escape) throws IOException {
+    private void append(char c, CharMatcher escape) {
         if (needsEscaping(c, escape)) {
             if (c == '\n') {
                 // Can't escape this with \, use numeric character reference

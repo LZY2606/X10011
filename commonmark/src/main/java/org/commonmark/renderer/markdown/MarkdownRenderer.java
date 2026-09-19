@@ -3,6 +3,7 @@ package org.commonmark.renderer.markdown;
 import java.util.*;
 import org.commonmark.Extension;
 import org.commonmark.internal.renderer.NodeRendererMap;
+import org.commonmark.internal.renderer.RendererUtil;
 import org.commonmark.node.Node;
 import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.Renderer;
@@ -66,9 +67,7 @@ public class MarkdownRenderer implements Renderer {
 
     @Override
     public String render(Node node) {
-        StringBuilder sb = new StringBuilder();
-        render(node, sb);
-        return sb.toString();
+        return RendererUtil.renderToString(this, node);
     }
 
     /**
@@ -144,7 +143,7 @@ public class MarkdownRenderer implements Renderer {
 
     private class RendererContext implements MarkdownNodeRendererContext {
         private final MarkdownWriter writer;
-        private final NodeRendererMap nodeRendererMap = new NodeRendererMap();
+        private final NodeRendererMap nodeRendererMap;
         private final Set<Character> additionalTextEscapes;
 
         private RendererContext(MarkdownWriter writer) {
@@ -156,11 +155,9 @@ public class MarkdownRenderer implements Renderer {
             }
             additionalTextEscapes = Collections.unmodifiableSet(escapes);
 
-            for (var factory : nodeRendererFactories) {
-                // Pass in this as context here, which uses the fields set above
-                var renderer = factory.create(this);
-                nodeRendererMap.add(renderer);
-            }
+            // Pass in this as context here, which uses the fields set above
+            nodeRendererMap =
+                    NodeRendererMap.create(nodeRendererFactories, factory -> factory.create(this));
         }
 
         @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.commonmark.Extension;
 import org.commonmark.internal.renderer.NodeRendererMap;
+import org.commonmark.internal.renderer.RendererUtil;
 import org.commonmark.node.Node;
 import org.commonmark.renderer.Renderer;
 
@@ -41,9 +42,7 @@ public class TextContentRenderer implements Renderer {
 
     @Override
     public String render(Node node) {
-        StringBuilder sb = new StringBuilder();
-        render(node, sb);
-        return sb.toString();
+        return RendererUtil.renderToString(this, node);
     }
 
     /**
@@ -128,15 +127,13 @@ public class TextContentRenderer implements Renderer {
 
     private class RendererContext implements TextContentNodeRendererContext {
         private final TextContentWriter textContentWriter;
-        private final NodeRendererMap nodeRendererMap = new NodeRendererMap();
+        private final NodeRendererMap nodeRendererMap;
 
         private RendererContext(TextContentWriter textContentWriter) {
             this.textContentWriter = textContentWriter;
 
-            for (var factory : nodeRendererFactories) {
-                var renderer = factory.create(this);
-                nodeRendererMap.add(renderer);
-            }
+            nodeRendererMap =
+                    NodeRendererMap.create(nodeRendererFactories, factory -> factory.create(this));
         }
 
         @Override

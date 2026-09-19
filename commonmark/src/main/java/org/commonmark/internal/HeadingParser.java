@@ -42,7 +42,7 @@ public class HeadingParser extends AbstractBlockParser {
 
         @Override
         public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
-            if (state.getIndent() >= Parsing.CODE_BLOCK_INDENT) {
+            if (Parsing.isCodeBlockIndent(state.getIndent())) {
                 return BlockStart.none();
             }
 
