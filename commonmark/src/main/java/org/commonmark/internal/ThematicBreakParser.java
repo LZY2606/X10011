@@ -1,5 +1,6 @@
 package org.commonmark.internal;
 
+import org.commonmark.internal.util.Parsing;
 import org.commonmark.node.Block;
 import org.commonmark.node.ThematicBreak;
 import org.commonmark.parser.block.*;
@@ -27,7 +28,7 @@ public class ThematicBreakParser extends AbstractBlockParser {
 
         @Override
         public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
-            if (state.getIndent() >= 4) {
+            if (Parsing.isCodeBlockIndent(state.getIndent())) {
                 return BlockStart.none();
             }
             int nextNonSpace = state.getNextNonSpaceIndex();

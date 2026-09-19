@@ -36,7 +36,7 @@ public class FencedCodeBlockParser extends AbstractBlockParser {
         int nextNonSpace = state.getNextNonSpaceIndex();
         int newIndex = state.getIndex();
         CharSequence line = state.getLine().getContent();
-        if (state.getIndent() < Parsing.CODE_BLOCK_INDENT
+        if (!Parsing.isCodeBlockIndent(state.getIndent())
                 && nextNonSpace < line.length()
                 && tryClosing(line, nextNonSpace)) {
             // closing fence - we're at end of line, so we can finalize now
@@ -75,7 +75,7 @@ public class FencedCodeBlockParser extends AbstractBlockParser {
         @Override
         public BlockStart tryStart(ParserState state, MatchedBlockParser matchedBlockParser) {
             int indent = state.getIndent();
-            if (indent >= Parsing.CODE_BLOCK_INDENT) {
+            if (Parsing.isCodeBlockIndent(indent)) {
                 return BlockStart.none();
             }
 

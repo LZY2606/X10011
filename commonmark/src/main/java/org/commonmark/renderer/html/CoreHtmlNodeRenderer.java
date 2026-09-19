@@ -3,13 +3,13 @@ package org.commonmark.renderer.html;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.commonmark.internal.renderer.CoreNodeRenderer;
 import org.commonmark.node.*;
-import org.commonmark.renderer.NodeRenderer;
 
 /**
  * The node renderer that renders all the core nodes (comes last in the order of node renderers).
  */
-public class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
+public class CoreHtmlNodeRenderer extends CoreNodeRenderer {
 
     protected final HtmlNodeRendererContext context;
     private final HtmlWriter html;
@@ -42,11 +42,6 @@ public class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRendere
                 HtmlInline.class,
                 SoftLineBreak.class,
                 HardLineBreak.class);
-    }
-
-    @Override
-    public void render(Node node) {
-        node.accept(this);
     }
 
     @Override
@@ -251,13 +246,8 @@ public class CoreHtmlNodeRenderer extends AbstractVisitor implements NodeRendere
     }
 
     @Override
-    protected void visitChildren(Node parent) {
-        Node node = parent.getFirstChild();
-        while (node != null) {
-            Node next = node.getNext();
-            context.render(node);
-            node = next;
-        }
+    protected void renderChild(Node node) {
+        context.render(node);
     }
 
     private void renderCodeBlock(String literal, Node node, Map<String, String> attributes) {

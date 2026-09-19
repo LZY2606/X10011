@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.commonmark.internal.renderer.CoreNodeRenderer;
 import org.commonmark.node.*;
-import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.text.AsciiMatcher;
 import org.commonmark.text.CharMatcher;
 import org.commonmark.text.Characters;
@@ -18,7 +18,7 @@ import org.commonmark.text.Characters;
  * created by directly creating {@link Node Nodes} instead. So in order to support that, it
  * sometimes needs to do a bit more work.
  */
-public class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRenderer {
+public class CoreMarkdownNodeRenderer extends CoreNodeRenderer {
 
     private final AsciiMatcher textEscape;
     private final CharMatcher textEscapeInHeading;
@@ -75,11 +75,6 @@ public class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRen
                 StrongEmphasis.class,
                 Text.class,
                 ThematicBreak.class);
-    }
-
-    @Override
-    public void render(Node node) {
-        node.accept(this);
     }
 
     @Override
@@ -452,13 +447,8 @@ public class CoreMarkdownNodeRenderer extends AbstractVisitor implements NodeRen
     }
 
     @Override
-    protected void visitChildren(Node parent) {
-        Node node = parent.getFirstChild();
-        while (node != null) {
-            Node next = node.getNext();
-            context.render(node);
-            node = next;
-        }
+    protected void renderChild(Node node) {
+        context.render(node);
     }
 
     private static int findMaxRunLength(String needle, String s) {

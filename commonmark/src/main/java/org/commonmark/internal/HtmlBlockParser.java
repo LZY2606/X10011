@@ -1,6 +1,7 @@
 package org.commonmark.internal;
 
 import java.util.regex.Pattern;
+import org.commonmark.internal.util.Parsing;
 import org.commonmark.node.Block;
 import org.commonmark.node.HtmlBlock;
 import org.commonmark.node.Paragraph;
@@ -116,7 +117,7 @@ public class HtmlBlockParser extends AbstractBlockParser {
             int nextNonSpace = state.getNextNonSpaceIndex();
             CharSequence line = state.getLine().getContent();
 
-            if (state.getIndent() < 4 && line.charAt(nextNonSpace) == '<') {
+            if (!Parsing.isCodeBlockIndent(state.getIndent()) && line.charAt(nextNonSpace) == '<') {
                 for (int blockType = 1; blockType <= 7; blockType++) {
                     // Type 7 can not interrupt a paragraph (not even a lazy one)
                     if (blockType == 7

@@ -3,6 +3,7 @@ package org.commonmark.renderer.html;
 import java.util.*;
 import org.commonmark.Extension;
 import org.commonmark.internal.renderer.NodeRendererMap;
+import org.commonmark.internal.renderer.Renderers;
 import org.commonmark.internal.util.Escaping;
 import org.commonmark.node.*;
 import org.commonmark.renderer.Renderer;
@@ -63,10 +64,7 @@ public class HtmlRenderer implements Renderer {
 
     @Override
     public String render(Node node) {
-        Objects.requireNonNull(node, "node must not be null");
-        StringBuilder sb = new StringBuilder();
-        render(node, sb);
-        return sb.toString();
+        return Renderers.renderToString(this, node);
     }
 
     /** Builder for configuring an {@link HtmlRenderer}. See methods for default configuration. */
@@ -234,7 +232,7 @@ public class HtmlRenderer implements Renderer {
 
         private final HtmlWriter htmlWriter;
         private final List<AttributeProvider> attributeProviders;
-        private final NodeRendererMap nodeRendererMap = new NodeRendererMap();
+        private final NodeRendererMap nodeRendererMap;
 
         private RendererContext(HtmlWriter htmlWriter) {
             this.htmlWriter = htmlWriter;
@@ -244,10 +242,8 @@ public class HtmlRenderer implements Renderer {
                 attributeProviders.add(attributeProviderFactory.create(this));
             }
 
-            for (var factory : nodeRendererFactories) {
-                var renderer = factory.create(this);
-                nodeRendererMap.add(renderer);
-            }
+            nodeRendererMap =
+                    NodeRendererMap.of(nodeRendererFactories, factory -> factory.create(this));
         }
 
         @Override
